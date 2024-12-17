@@ -1,0 +1,91 @@
+import pygame
+
+
+class Board:
+    # создание поля
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.board = [[0] * width for _ in range(height)]
+        # значения по умолчанию
+        self.left = 10
+        self.top = 10
+        self.cell_size = 30
+        self.spis = []
+        self.cvet = []
+        self.colors = [pygame.Color(0, 0, 0), pygame.Color(255, 0, 0), pygame.Color(0, 0, 255)]
+        self.f = 4
+        self.proverka = [[0] * width for _ in range(height)]
+
+    # настройка внешнего вида
+    def set_view(self, left, top, cell_size):
+        self.left = left
+        self.top = top
+        self.cell_size = cell_size
+
+    def render(self, screen):
+        for y in range(self.height):
+            for x in range(self.width):
+                self.a = pygame.draw.rect(screen, pygame.Color(255, 255, 255), (
+                    x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size,
+                    self.cell_size), 1)
+                if self.f == 2:
+                    pygame.draw.circle(screen, self.colors[self.board[y][x]], (x * self.cell_size + self.left + 25, y * self.cell_size + self.top + 25), 23, 2)
+                elif self.f == 1:
+                    pygame.draw.line(screen, self.colors[self.board[y][x]],
+                                     [x * self.cell_size + self.left + 4, y * self.cell_size + self.top + 4],
+                                     [x * self.cell_size + self.left + 46, y * self.cell_size + self.top + 46], 2)
+                    pygame.draw.line(screen, self.colors[self.board[y][x]],
+                                     [x * self.cell_size + self.left + 4, y * self.cell_size + self.top + 46],
+                                     [x * self.cell_size + self.left + 46, y * self.cell_size + self.top + 4], 2)
+                if self.a not in self.spis:
+                    self.spis.append(self.a)
+
+    def get_cell(self, mouse_pos):
+        a = False
+        for i in range(len(self.spis)):
+            if self.spis[i].collidepoint(mouse_pos):
+                stroka = int(((i + 1) - 1) / self.width) + 1
+                stolbec = int((i + 1) - (self.width * (stroka - 1)))
+                self.row = stroka
+                self.cow = stolbec
+                print(stolbec - 1, stroka - 1)
+                if self.f == 2 and self.proverka[stroka - 1][stolbec - 1] == 0 or self.f == 4:
+                    self.f = self.board[stroka - 1][stolbec - 1] = 1
+                    self.proverka[stroka - 1][stolbec - 1] = 3
+                elif self.f == 1 and self.proverka[stroka - 1][stolbec - 1] == 0:
+                    self.f = self.board[stroka - 1][stolbec - 1] = 2
+                    self.proverka[stroka - 1][stolbec - 1] = 3
+                a = True
+        if not a:
+            print(None)
+
+
+    def on_click(self, cell_coords):
+        # print(None)
+        pass
+
+    #
+    def get_click(self, mouse_pos):
+        cell = self.get_cell(mouse_pos)
+        self.on_click(cell)
+
+
+if __name__ == '__main__':
+    pygame.init()
+    size = 900, 900
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption('Инициализация игры')
+    board = Board(5, 7)
+    board.set_view(100, 100, 50)
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                board.get_click(event.pos)
+        screen.fill((0, 0, 0))
+        board.render(screen)
+        pygame.display.flip()
+    pygame.quit()
